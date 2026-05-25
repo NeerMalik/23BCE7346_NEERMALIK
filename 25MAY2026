@@ -1,0 +1,27 @@
+use studentDB
+
+show dbs
+
+db.dropDatabase()
+
+db.createCollection("students")
+
+db.students.insertOne({
+  name: "Neer",
+  age: 21,
+  course: "BTech"
+})
+
+db.students.insertMany([
+  { name: "Rahul", age: 20 },
+  { name: "Aman", age: 22 },
+  { name: "Priya", age: 19 }
+])
+
+db.students.find()
+
+db.students.find({ age: 20 })
+
+db.students.findOne({ name: "Rahul" })
+
+db.students.drop()
