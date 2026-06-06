@@ -1,0 +1,806 @@
+db.collection.getIndexes()
+Output
+[ { v: 2, key: { _id: 1 }, name: '_id_' } ]
+
+
+
+db.sales.find({
+    item: "Americanos"
+}).explain("executionStats")
+Output
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'test.sales',
+    parsedQuery: {
+      item: {
+        '$eq': 'Americanos'
+      }
+    },
+    indexFilterSet: false,
+    queryHash: '0E0066AE',
+    planCacheShapeHash: '0E0066AE',
+    planCacheKey: '578774AE',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: {
+        item: {
+          '$eq': 'Americanos'
+        }
+      },
+      direction: 'forward'
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 4,
+    executionTimeMillis: 13,
+    totalKeysExamined: 0,
+    totalDocsExamined: 10,
+    executionStages: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: {
+        item: {
+          '$eq': 'Americanos'
+        }
+      },
+      nReturned: 4,
+      executionTimeMillisEstimate: 0,
+      works: 11,
+      advanced: 4,
+      needTime: 6,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      direction: 'forward',
+      docsExamined: 10
+    }
+  },
+  queryShapeHash: 'DD5EEA835A10B04AADFB21730484091CB7E2162A1840AA39B1471061455E0A8F',
+  command: {
+    find: 'sales',
+    filter: {
+      item: 'Americanos'
+    },
+    '$db': 'test'
+  },
+  serverInfo: {
+    host: 'MAHADEV',
+    port: 27017,
+    version: '8.0.6',
+    gitVersion: '80f21521ad4a3dfd5613f5d649d7058c6d46277f'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok:
+
+
+db.sales.createIndex({ item: 1 })
+Output
+item_1
+
+
+db.sales.getIndexes()
+
+Output
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { item: 1 }, name: 'item_1' }
+]
+
+
+db.sales.find({
+    item: "Americanos"
+})
+Output
+{
+  _id: 1,
+  item: 'Americanos',
+  price: 5,
+  size: 'Short',
+  quantity: 22,
+  date: 2022-01-15T08:00:00.000Z
+}
+{
+  _id: 5,
+  item: 'Americanos',
+  price: 10,
+  size: 'Grande',
+  quantity: 12,
+  date: 2022-02-18T21:06:00.000Z
+}
+{
+  _id: 8,
+  item: 'Americanos',
+  price: 10,
+  size: 'Grande',
+  quantity: 21,
+  date: 2022-02-22T14:09:00.000Z
+}
+{
+  _id: 10,
+  item: 'Americanos',
+  price: 8,
+  size: 'Tall',
+  quantity: 15,
+  date: 2022-02-25T14:09:00.000Z
+}
+
+
+
+db.users.insertMany([
+   { email:  "john@test.com", name: "john"},
+   { email:  "jane@test.com", name: "jane"},
+]);
+Output
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6a241e60770746d9c4d5e8d5'),
+    '1': ObjectId('6a241e60770746d9c4d5e8d6')
+  }
+}
+
+
+db.users.createIndex({email:1},{unique:true});
+Output
+email_1
+
+
+db.users.insertOne(
+   { email:  "john@test.com", name: "johny"}
+);
+
+Output
+MongoServerError: E11000 duplicate key error collection: test.users index: email_1 dup key: { email: "john@test.com" }
+
+
+
+db.users.drop()
+
+db.users.insertMany([
+   { email:  "john@test.com", name: "john"},
+   { email:  "john@test.com", name: "johny"},
+   { email:  "jane@test.com", name: "jane"},
+])
+
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('6a241f58770746d9c4d5e8d8'),
+    '1': ObjectId('6a241f58770746d9c4d5e8d9'),
+    '2': ObjectId('6a241f58770746d9c4d5e8da')
+  }
+}
+
+db.users.createIndex({email: 1},{unique:true})
+db.users.createIndex({email: 1},{unique:true})
+MongoServerError[DuplicateKey]: Index build failed: 04a72bdc-5098-4a97-a190-ce80c5ba02d5: Collection test.users ( b67f5e5d-641d-468d-b37d-2d3facf02183 ) :: caused by :: E11000 duplicate key error collection: test.users index: email_1 dup key: { email: "john@test.com" }
+
+
+db.users.deleteOne({name:'johny', email: 'john@test.com'});
+Output
+{
+  acknowledged: true,
+  deletedCount: 1
+}
+
+db.users.createIndex({email: 1},{unique:true})
+Output
+
+email_1
+
+
+db.collection.createIndex({field1: 1, field2: 1}, {unique: true});
+
+Output
+field1_1_field2_1
+
+
+db.locations.insertOne({
+	address: "Downtown San Jose, CA, USA",
+	lat: 37.335480,
+	long: -121.893028
+})
+Output
+{
+  acknowledged: true,
+  insertedId: ObjectId('6a241ff1770746d9c4d5e8db')
+}
+
+
+db.locations.createIndex({
+	lat: 1,
+	long: 1
+},{ unique: true });
+Output
+lat_1_long_1
+
+
+db.locations.insertOne({
+	address: "Dev Bootcamp, San Jose, CA, USA",
+	lat: 37.335480,
+	long: -122.893028
+})
+
+Output
+{
+  acknowledged: true,
+  insertedId: ObjectId('6a24201a770746d9c4d5e8dc')
+}
+
+
+db.locations.insertOne({
+	address: "Central San Jose, CA, USA",
+	lat: 37.335480,
+	long: -121.893028
+})
+
+Output
+MongoServerError: E11000 duplicate key error collection: test.locations index: lat_1_long_1 dup key: { lat: 37.33548, long: -121.893028 }	
+
+
+
+db.sales.createIndex({ item: 1, price: 1 })
+Output
+
+item_1_price_1
+
+
+
+db.sales.find({
+    item: /americano/i,
+    price: 10
+}).explain("executionStats")
+Output
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'test.sales',
+    parsedQuery: {
+      '$and': [
+        {
+          price: {
+            '$eq': 10
+          }
+        },
+        {
+          item: BSONRegExp('americano', 'i')
+        }
+      ]
+    },
+    indexFilterSet: false,
+    queryHash: '764C83B8',
+    planCacheShapeHash: '764C83B8',
+    planCacheKey: 'CD3DA23F',
+    optimizationTimeMillis: 68,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'FETCH',
+      inputStage: {
+        stage: 'IXSCAN',
+        filter: {
+          item: BSONRegExp('americano', 'i')
+        },
+        keyPattern: {
+          item: 1,
+          price: 1
+        },
+        indexName: 'item_1_price_1',
+        isMultiKey: false,
+        multiKeyPaths: {
+          item: [],
+          price: []
+        },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: {
+          item: [
+            '["", {})',
+            '[/americano/i, /americano/i]'
+          ],
+          price: [
+            '[10, 10]'
+          ]
+        }
+      }
+    },
+    rejectedPlans: [
+      {
+        isCached: false,
+        stage: 'FETCH',
+        filter: {
+          price: {
+            '$eq': 10
+          }
+        },
+        inputStage: {
+          stage: 'IXSCAN',
+          filter: {
+            item: BSONRegExp('americano', 'i')
+          },
+          keyPattern: {
+            item: 1
+          },
+          indexName: 'item_1',
+          isMultiKey: false,
+          multiKeyPaths: {
+            item: []
+          },
+          isUnique: false,
+          isSparse: false,
+          isPartial: false,
+          indexVersion: 2,
+          direction: 'forward',
+          indexBounds: {
+            item: [
+              '["", {})',
+              '[/americano/i, /americano/i]'
+            ]
+          }
+        }
+      }
+    ]
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 2,
+    executionTimeMillis: 68,
+    totalKeysExamined: 7,
+    totalDocsExamined: 2,
+    executionStages: {
+      isCached: false,
+      stage: 'FETCH',
+      nReturned: 2,
+      executionTimeMillisEstimate: 26,
+      works: 9,
+      advanced: 2,
+      needTime: 5,
+      needYield: 0,
+      saveState: 1,
+      restoreState: 1,
+      isEOF: 1,
+      docsExamined: 2,
+      alreadyHasObj: 0,
+      inputStage: {
+        stage: 'IXSCAN',
+        filter: {
+          item: BSONRegExp('americano', 'i')
+        },
+        nReturned: 2,
+        executionTimeMillisEstimate: 26,
+        works: 8,
+        advanced: 2,
+        needTime: 5,
+        needYield: 0,
+        saveState: 1,
+        restoreState: 1,
+        isEOF: 1,
+        keyPattern: {
+          item: 1,
+          price: 1
+        },
+        indexName: 'item_1_price_1',
+        isMultiKey: false,
+        multiKeyPaths: {
+          item: [],
+          price: []
+        },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: {
+          item: [
+            '["", {})',
+            '[/americano/i, /americano/i]'
+          ],
+          price: [
+            '[10, 10]'
+          ]
+        },
+        keysExamined: 7,
+        seeks: 5,
+        dupsTested: 0,
+        dupsDropped: 0
+      }
+    }
+  },
+  queryShapeHash: '294D83F41661511CF028227957A8CB7BD417A9B50822BF251FD0C993F91110FB',
+  command: {
+    find: 'sales',
+    filter: {
+      item: BSONRegExp('americano', 'i'),
+      price: 10
+    },
+    '$db': 'test'
+  },
+  serverInfo: {
+    host: 'MAHADEV',
+    port: 27017,
+    version: '8.0.6',
+    gitVersion: '80f21521ad4a3dfd5613f5d649d7058c6d46277f'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+
+db.sales.find({
+    item: /americano/i
+}).explain("executionStats")
+Output
+
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'test.sales',
+    parsedQuery: {
+      item: BSONRegExp('americano', 'i')
+    },
+    indexFilterSet: false,
+    queryHash: '2B767098',
+    planCacheShapeHash: '2B767098',
+    planCacheKey: '6131E808',
+    optimizationTimeMillis: 13,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'FETCH',
+      inputStage: {
+        stage: 'IXSCAN',
+        filter: {
+          item: BSONRegExp('americano', 'i')
+        },
+        keyPattern: {
+          item: 1
+        },
+        indexName: 'item_1',
+        isMultiKey: false,
+        multiKeyPaths: {
+          item: []
+        },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: {
+          item: [
+            '["", {})',
+            '[/americano/i, /americano/i]'
+          ]
+        }
+      }
+    },
+    rejectedPlans: [
+      {
+        isCached: false,
+        stage: 'FETCH',
+        inputStage: {
+          stage: 'IXSCAN',
+          filter: {
+            item: BSONRegExp('americano', 'i')
+          },
+          keyPattern: {
+            item: 1,
+            price: 1
+          },
+          indexName: 'item_1_price_1',
+          isMultiKey: false,
+          multiKeyPaths: {
+            item: [],
+            price: []
+          },
+          isUnique: false,
+          isSparse: false,
+          isPartial: false,
+          indexVersion: 2,
+          direction: 'forward',
+          indexBounds: {
+            item: [
+              '["", {})',
+              '[/americano/i, /americano/i]'
+            ],
+            price: [
+              '[MinKey, MaxKey]'
+            ]
+          }
+        }
+      }
+    ]
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 4,
+    executionTimeMillis: 14,
+    totalKeysExamined: 10,
+    totalDocsExamined: 4,
+    executionStages: {
+      isCached: false,
+      stage: 'FETCH',
+      nReturned: 4,
+      executionTimeMillisEstimate: 0,
+      works: 12,
+      advanced: 4,
+      needTime: 6,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      docsExamined: 4,
+      alreadyHasObj: 0,
+      inputStage: {
+        stage: 'IXSCAN',
+        filter: {
+          item: BSONRegExp('americano', 'i')
+        },
+        nReturned: 4,
+        executionTimeMillisEstimate: 0,
+        works: 11,
+        advanced: 4,
+        needTime: 6,
+        needYield: 0,
+        saveState: 0,
+        restoreState: 0,
+        isEOF: 1,
+        keyPattern: {
+          item: 1
+        },
+        indexName: 'item_1',
+        isMultiKey: false,
+        multiKeyPaths: {
+          item: []
+        },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: {
+          item: [
+            '["", {})',
+            '[/americano/i, /americano/i]'
+          ]
+        },
+        keysExamined: 10,
+        seeks: 1,
+        dupsTested: 0,
+        dupsDropped: 0
+      }
+    }
+  },
+  queryShapeHash: 'B493A9985883CCE6D87C6063A9DE777848958ECA71CFC0EE7B011C8DDBA122B7',
+  command: {
+    find: 'sales',
+    filter: {
+      item: BSONRegExp('americano', 'i')
+    },
+    '$db': 'test'
+  },
+  serverInfo: {
+    host: 'MAHADEV',
+    port: 27017,
+    version: '8.0.6',
+    gitVersion: '80f21521ad4a3dfd5613f5d649d7058c6d46277f'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+
+
+
+db.sales.find({
+    price: 10
+}).explain("executionStats")
+Output
+{
+  explainVersion: '1',
+  queryPlanner: {
+    namespace: 'test.sales',
+    parsedQuery: {
+      price: {
+        '$eq': 10
+      }
+    },
+    indexFilterSet: false,
+    queryHash: '74213DB8',
+    planCacheShapeHash: '74213DB8',
+    planCacheKey: 'D8A5400A',
+    optimizationTimeMillis: 0,
+    maxIndexedOrSolutionsReached: false,
+    maxIndexedAndSolutionsReached: false,
+    maxScansToExplodeReached: false,
+    prunedSimilarIndexes: false,
+    winningPlan: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: {
+        price: {
+          '$eq': 10
+        }
+      },
+      direction: 'forward'
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 3,
+    executionTimeMillis: 0,
+    totalKeysExamined: 0,
+    totalDocsExamined: 10,
+    executionStages: {
+      isCached: false,
+      stage: 'COLLSCAN',
+      filter: {
+        price: {
+          '$eq': 10
+        }
+      },
+      nReturned: 3,
+      executionTimeMillisEstimate: 0,
+      works: 11,
+      advanced: 3,
+      needTime: 7,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      direction: 'forward',
+      docsExamined: 10
+    }
+  },
+  queryShapeHash: '1FBE192C822C34B42D483E2E5FA3064096227EDF23CF6C3B3BC254C9411ED517',
+  command: {
+    find: 'sales',
+    filter: {
+      price: 10
+    },
+    '$db': 'test'
+  },
+  serverInfo: {
+    host: 'MAHADEV',
+    port: 27017,
+    version: '8.0.6',
+    gitVersion: '80f21521ad4a3dfd5613f5d649d7058c6d46277f'
+  },
+  serverParameters: {
+    internalQueryFacetBufferSizeBytes: 104857600,
+    internalQueryFacetMaxOutputDocSizeBytes: 104857600,
+    internalLookupStageIntermediateDocumentMaxSizeBytes: 104857600,
+    internalDocumentSourceGroupMaxMemoryBytes: 104857600,
+    internalQueryMaxBlockingSortMemoryUsageBytes: 104857600,
+    internalQueryProhibitBlockingMergeOnMongoS: 0,
+    internalQueryMaxAddToSetBytes: 104857600,
+    internalDocumentSourceSetWindowFieldsMaxMemoryBytes: 104857600,
+    internalQueryFrameworkControl: 'trySbeRestricted',
+    internalQueryPlannerIgnoreIndexWithCollationForRegex: 1
+  },
+  ok: 1
+}
+
+
+
+db.sales.createIndex({ price: 1 })
+
+Output
+price_1
+
+db.sales.getIndexes()
+Output
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { item: 1 }, name: 'item_1' },
+  { v: 2, key: { item: 1, price: 1 }, name: 'item_1_price_1' },
+  { v: 2, key: { price: 1 }, name: 'price_1' }
+]
+
+db.sales.dropIndex("price_1")
+Output
+{ nIndexesWas: 4, ok: 1 }
+
+
+db.sales.createIndex({ quantity: -1 })
+Output
+quantity_-1
+
+db.sales.getIndexes()
+Output
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { item: 1 }, name: 'item_1' },
+  { v: 2, key: { item: 1, price: 1 }, name: 'item_1_price_1' },
+  { v: 2, key: { quantity: -1 }, name: 'quantity_-1' }
+]
+
+
+db.sales.dropIndex({ quantity: -1 })
+Output
+{ nIndexesWas: 4, ok: 1 }
+
+
+
+db.sales.createIndex({ item: 1 })
+
+db.sales.createIndex({ size: 1 })
+
+db.sales.createIndex({ price: 1 })
+Output
+price_1
+
+
+db.sales.getIndexes()
+Output
+[
+  { v: 2, key: { _id: 1 }, name: '_id_' },
+  { v: 2, key: { item: 1 }, name: 'item_1' },
+  { v: 2, key: { item: 1, price: 1 }, name: 'item_1_price_1' },
+  { v: 2, key: { size: 1 }, name: 'size_1' },
+  { v: 2, key: { price: 1 }, name: 'price_1' }
+]
+
+
+db.sales.dropIndexes()
+Output
+{
+  nIndexesWas: 5,
+  msg: 'non-_id indexes dropped for collection',
+  ok: 1
+}
+
+
+db.sales.getIndexes()
+Output
+[ { v: 2, key: { _id: 1 }, name: '_id_' } ]
